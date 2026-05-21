@@ -1,0 +1,19 @@
+# orchestration nad state management
+
+langgraph
+pydantic
+
+# llm integration
+
+langchain-openai
+langchain-community
+
+# agent tools
+
+yfinance
+ddgs
+
+# telemetry and env
+
+langsmith
+python-dotenv
