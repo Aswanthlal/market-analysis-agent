@@ -1,72 +1,81 @@
-# Market Analyzer — Autonomous Multi-Agent Equity Research System
+#  Market Analyzer — Async Multi-Agent Equity Research System
 
-An asynchronous multi agent equity research platform built with LangGraph, Streamlit, and Groq LLMs.
+An asynchronous multi agent equity research platform built with **LangGraph**, **Groq LLMs**, **Streamlit**, and **Langfuse**.
 
-The system performs concurrent market analysis across entire sectors using isolated asset level agent pipelines. Each asset is evaluated by multiple specialist agents (Fundamental, Technical, and Sentiment) before passing through a centralized Risk Governor responsible for portfolio approval and allocation limits.
+The system performs parallel stock analysis across entire market sectors using isolated asset-level evaluation pipelines. Each stock is analyzed by multiple specialist AI agents before passing through a centralized Risk Governor responsible for approval logic and portfolio allocation constraints.
 
-The architecture is designed around scalable orchestration, concurrent cognition, observability, and deterministic risk governance.
+The project focuses on:
 
----
+* hierarchical agent orchestration
+* concurrent specialist evaluation
+* async execution pipelines
+* risk-governed synthesis
+* observability-first infrastructure
 
-##  Features
 
-* Dynamic sector based stock discovery
+# Features
+
+* Dynamic sector-based stock discovery
 * Concurrent specialist agents per asset
 * Hierarchical orchestration using LangGraph
-* Risk governed portfolio synthesis
 * Async execution using `asyncio`
+* Risk-governed portfolio synthesis
 * Langfuse tracing & telemetry integration
-* Streamlit real time execution dashboard
+* Streamlit real-time execution dashboard
 * Structured outputs using Pydantic schemas
-* Local first architecture with no paid dependencies required
+* Local-first architecture using open-source tooling and free inference APIs
 
 ---
 
-#  Architecture
+# Architecture
 
-The system implements a hierarchical map-reduce orchestration model.
+The system uses a hierarchical map-reduce orchestration model.
 
 ```text
-                 [ START ]
-                     │
-             ──► screener_node ──►
-                     │
-     ┌───────────────┼───────────────┐
-     ▼               ▼               ▼
-[Asset: NVDA]   [Asset: AVGO]   [Asset: AMD]
-
-├── Fundamental Specialist
-├── Technical Specialist
-├── Sentiment Specialist
-└── Risk Governor
-
-     └───────────────┼───────────────┘
-                     ▼
-         portfolio_manager_node
-                     │
-                   [ END ]
+START
+  ↓
+Screener Agent
+  ↓
+Parallel Asset Pipelines
+  ├── Fundamental Agent
+  ├── Technical Agent
+  ├── Sentiment-Oriented Agent
+  └── Risk Governor
+  ↓
+Portfolio Manager
+  ↓
+END
 ```
+
+Each asset pipeline operates independently, allowing:
+
+* isolated execution boundaries
+* parallel evaluation
+* improved scalability
+* simplified tracing & debugging
 
 ---
 
-#  Multi Agent Design
+# Multi Agent Design
 
-Each asset evaluation operates as an isolated autonomous execution cell.
+Every stock is evaluated through a localized multi agent pipeline.
 
-Inside every asset pipeline:
+### Specialist Agents
 
-* Fundamental Agent evaluates valuation and growth metrics
-* Technical Agent evaluates momentum and price structure
-* Sentiment Agent evaluates broader market conditions
-* Risk Governor applies deterministic veto logic and position sizing
+| Agent                    | Responsibility                                |
+| ------------------------ | --------------------------------------------- |
+| Fundamental Agent        | Valuation, growth, and profitability analysis |
+| Technical Agent          | Momentum and price structure analysis         |
+| Sentiment-Oriented Agent | Broad market sentiment reasoning              |
+| Risk Governor            | Approval logic and position sizing            |
 
-All specialists execute concurrently using:
+Specialist agents execute concurrently using:
 
 ```python
 await asyncio.gather(*specialist_tasks)
 ```
 
-This significantly reduces total inference latency while maintaining isolated cognitive boundaries per asset.
+This reduces total inference latency while maintaining isolated reasoning boundaries per asset.
 
 ---
 
@@ -83,7 +92,7 @@ This allows the system to scale asset evaluations efficiently without blocking t
 
 ---
 
-#  Observability
+# Observability
 
 The platform integrates Langfuse for:
 
@@ -96,14 +105,14 @@ The platform integrates Langfuse for:
 
 Each workflow run produces trace trees across:
 
-* Screener execution
-* Specialist cognition
-* Risk governance
-* Portfolio synthesis
+* screener execution
+* specialist evaluation
+* risk governance
+* portfolio synthesis
 
 ---
 
-#  Tech Stack
+# Tech Stack
 
 | Layer         | Technology           |
 | ------------- | -------------------- |
@@ -118,79 +127,23 @@ Each workflow run produces trace trees across:
 
 ---
 
-# Installation
+# Project Structure
 
-## 1. Clone Repository
-
-```bash
-git clone <your_repo_url>
-cd MultiagentAnalyzer
+```text
+market-analysis-agent/
+│
+├── main.py
+├── ui.py
+├── requirements.txt
+├── .env.example
+├── README.md
+│
+├── screenshots/
+│   ├── ui-demo.png
+│   └── langfuse-traces.png
+│
+└── architecture/
+    └── system-design.png
 ```
-
----
-
-## 2. Create Virtual Environment
-
-```bash
-python -m venv .venv
-```
-
-Activate environment:
-
-### Windows
-
-```bash
-.venv\Scripts\activate
-```
-
-### Linux / macOS
-
-```bash
-source .venv/bin/activate
-```
-
----
-
-## 3. Install Dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
----
-
-## 4. Configure Environment Variables
-
-Create a `.env` file:
-
-```env
-# Groq
-GROQ_API_KEY=your_groq_key
-
-# Langfuse
-LANGFUSE_SECRET_KEY=your_secret_key
-LANGFUSE_PUBLIC_KEY=your_public_key
-LANGFUSE_HOST=https://us.cloud.langfuse.com
-```
-
----
-
-## 5. Launch Application
-
-```bash
-streamlit run ui.py
-```
-
----
-
-# Example Workflow
-
-1. User selects a target sector
-2. Screener agent identifies leading assets
-3. Parallel asset evaluation pipelines initialize
-4. Specialist agents analyze each asset concurrently
-5. Risk Governor applies approval/veto logic
-6. Portfolio Manager generates final synthesis report
-7. Langfuse records complete execution traces
 
 
