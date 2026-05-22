@@ -15,21 +15,19 @@ The project focuses on:
 
 # Features
 
-* Dynamic sector-based stock discovery
+* Dynamic sector based stock discovery
 * Concurrent specialist agents per asset
 * Hierarchical orchestration using LangGraph
-* Async execution using `asyncio`
-* Risk-governed portfolio synthesis
-* Langfuse tracing & telemetry integration
-* Streamlit real-time execution dashboard
-* Structured outputs using Pydantic schemas
-* Local-first architecture using open-source tooling and free inference APIs
+* Async execution
+* Risk governed portfolio synthesis
+* Langfuse tracing
+* Streamlit execution dashboard
 
 ---
 
 # Architecture
 
-The system uses a hierarchical map-reduce orchestration model.
+The system uses a hierarchical map reduce orchestration model.
 
 ```text
 START
@@ -39,7 +37,7 @@ Screener Agent
 Parallel Asset Pipelines
   ├── Fundamental Agent
   ├── Technical Agent
-  ├── Sentiment-Oriented Agent
+  ├── Sentiment Oriented Agent
   └── Risk Governor
   ↓
 Portfolio Manager
@@ -103,12 +101,6 @@ The platform integrates Langfuse for:
 * Runtime latency analysis
 * Hierarchical workflow replay
 
-Each workflow run produces trace trees across:
-
-* screener execution
-* specialist evaluation
-* risk governance
-* portfolio synthesis
 
 ---
 
