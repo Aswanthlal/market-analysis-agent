@@ -1,4 +1,4 @@
-#  Market Analyzer — Async Multi-Agent Equity Research System
+#  Market Analyzer — Async Multi Agent Equity Research System
 
 An asynchronous multi agent equity research platform built with **LangGraph**, **Groq LLMs**, **Streamlit**, and **Langfuse**.
 
