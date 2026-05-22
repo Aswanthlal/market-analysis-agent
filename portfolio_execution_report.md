@@ -13,3 +13,4 @@ In contrast, certain assets in the fintech sector have been subject to vetoes du
 | IBKR | Bullish | The compiled specialist intel shows a bullish trend with a moderate to high confidence level across fundamental and technical vectors, while the sentiment vector is neutral. The average confidence level is 0.7, which is relatively strong. Since there is no direct conflict across vectors and the average confidence is not weak, the risk assessment is approved with a moderate max position size of 0.05. |
 | PAYX | Bullish | All specialists agree on a bullish direction with an average confidence of 0.7, indicating a strong potential for growth. |
 | JKHY | Vetoed | Direct conflict exists across vectors and average confidence is not strong enough to approve the risk assessment. |
+

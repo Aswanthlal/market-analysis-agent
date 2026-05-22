@@ -16,11 +16,11 @@ from langfuse.langchain import CallbackHandler
 from langfuse import get_client
 
 
-# 0. INITIALIZATION
+# 0. initialization
 
 load_dotenv()
 
-# Initialize Groq using correct free-tier parameters
+# llm
 llm = ChatOpenAI(
     api_key=os.getenv("GROQ_API_KEY"),
     base_url="https://api.groq.com/openai/v1",
@@ -30,7 +30,7 @@ llm = ChatOpenAI(
 
 
 
-# 1. OPTIMIZED DATA SCHEMAS
+# 1. data schema
 
 class Tickerlist(BaseModel):
     tickers: List[str] = Field(description="List of stock ticker symbols.")
@@ -74,7 +74,7 @@ risk_llm = llm.with_structured_output(RiskAssessment, method="function_calling")
 
 
 
-# 2. DATA ACQUISITION
+# 2. data collection
 
 def fetch_sector_tickers_sync(sector_query: str, max_results: int) -> str:
     print(f" [Screener] Locating top asset tickers for '{sector_query}'")
@@ -112,7 +112,7 @@ def fetch_stock_data_sync(ticker_symbol: str) -> dict:
         return {"fundamentals": {}, "technical": {}}
 
 
-# 3. INTERNAL SPECIALISTS (Async Agents)
+# 3. agents
 
 async def run_fundamental_analyst(ticker: str, data: dict) -> dict:
     prompt = f"Analyze fundamental metrics for {ticker}: {data['fundamentals']}. Provide BULLISH/BEARISH/NEUTRAL."
@@ -138,11 +138,10 @@ async def run_sentiment_analyst(ticker: str) -> dict:
     return signal
 
 
-# 4. HIERARCHICAL GRAPH NODES
+# 4. nodes
 
 async def screener_node(state: GraphState):
     target_count = state.get("num_companies", 5)
-    # Offload blocking network call to separate thread
     raw_data = await asyncio.to_thread(fetch_sector_tickers_sync, state["sector_query"], target_count + 2)
 
     prompt = f"""Extract exactly {target_count} stock tickers for '{state["sector_query"]}' from this data: {raw_data}. Return ONLY valid US ticker symbols."""
@@ -158,10 +157,8 @@ async def evaluate_asset_node(state: dict):
     ticker = state["ticker"]
     print(f"[{ticker}] Initiating concurrent specialist evaluation...")
 
-    # 1. Fetch raw asset data off main thread
     stock_data = await asyncio.to_thread(fetch_stock_data_sync, ticker)
 
-    # 2. CONCURRENT COGNITION: Fire all specialists at exactly the same time
     specialist_tasks = [
         run_fundamental_analyst(ticker, stock_data),
         run_technical_analyst(ticker, stock_data),
@@ -169,7 +166,6 @@ async def evaluate_asset_node(state: dict):
     ]
     compiled_signals = await asyncio.gather(*specialist_tasks)
 
-    # 3. SEQUENTIAL DEPENDENCY: Risk Governor evaluates the compiled intel
     risk_prompt = f"""
     You are the Risk Governor for {ticker}. Review the compiled specialist intel:
     {json.dumps(compiled_signals, default=str)}
@@ -183,7 +179,6 @@ async def evaluate_asset_node(state: dict):
 
     print(f"[{ticker}] Evaluation complete. Cleared Risk: {risk_assessment.approved}")
 
-    # 4. Package for Global Reducer
     return {
         "asset_results": [{
             "ticker": ticker,
@@ -212,7 +207,7 @@ async def portfolio_manager_node(state: GraphState):
     for r in results:
         ticker = r["ticker"]
         if r["risk_assessment"]["approved"]:
-            # Extract fundamental direction dynamically
+            #  fundamental direction
             fund_sig = next((s for s in r["signals"] if s["specialist"] == "FUNDAMENTAL"), None)
             verdict = fund_sig["direction"].capitalize() if fund_sig else "Approved"
             driver = r["risk_assessment"]["risk_reason"].replace("|", "-")
@@ -225,7 +220,7 @@ async def portfolio_manager_node(state: GraphState):
     return {"final_report": report}
 
 
-# 5. ROUTING & TOPOLOGY
+# 5. routing
 def map_to_assets(state: GraphState):
     """Fans out execution to isolated asset sub-graphs."""
     return [Send("evaluate_asset_node", {"ticker": ticker}) for ticker in state["discovered_tickers"]]
@@ -242,12 +237,12 @@ workflow.add_conditional_edges("screener_node", map_to_assets, ["evaluate_asset_
 workflow.add_edge("evaluate_asset_node", "portfolio_manager_node")
 workflow.add_edge("portfolio_manager_node", END)
 
-# Checkpointer for state memory
+# state memory
 memory = MemorySaver()
 app = workflow.compile(checkpointer=memory)
 
 
-# 6. EXECUTION ENGINE
+# 6. execution
 async def main():
     print("\n" + "=" * 50)
     print("BOOTING V7 AUTONOMOUS RESEARCH KERNEL")
@@ -282,15 +277,14 @@ async def main():
         }
     }
 
-    # Execute graph asynchronously
+    # execute graph
     async for output in app.astream(initial_state, config=thread_config):
         for node_name, state_update in output.items():
             print(f" Trace: Node '{node_name}' finished execution.")
 
-    # Ensure Langfuse traces are pushed successfully
     get_client().flush()
 
-    # Retrieve and output final state
+    # retrieve and output final state
     final_state = app.get_state(thread_config).values
     report_content = final_state.get("final_report", "Pipeline execution error occurred.")
 
@@ -306,5 +300,4 @@ async def main():
 
 
 if __name__ == "__main__":
-    # running asyncio at the top level
     asyncio.run(main())
